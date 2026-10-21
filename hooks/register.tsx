@@ -9,9 +9,9 @@ const TITLE = 'TODO dashboard'
 const REFRESH_MS = 60_000
 
 const EMPTY: Scan = { items: [], projects: 0, scannedAt: 0 }
-const scan = atom({ plugin: 'todo-dashboard', key: 'scan' } as const, EMPTY)
-const filter = atom({ plugin: 'todo-dashboard', key: 'filter' } as const, 'all' as Filter)
-const project = atom({ plugin: 'todo-dashboard', key: 'project' } as const, '')
+const scan = atom({ plugin: 'todo-md', key: 'scan' } as const, EMPTY)
+const filter = atom({ plugin: 'todo-md', key: 'filter' } as const, 'all' as Filter)
+const project = atom({ plugin: 'todo-md', key: 'project' } as const, '')
 
 const FILTERS: readonly { value: Filter; label: string; hotkey: string }[] = [
   { value: 'all', label: 'all', hotkey: 'a' },
@@ -76,7 +76,7 @@ async function scanProject($: EngineInterface, project: string, root: string): P
 /** Every project in ~/.claude/state/todo-projects.tsv (or $TODO_REGISTRY), as todo.sh keeps it. */
 async function scanAll($: EngineInterface): Promise<Scan> {
   const scannedAt = await $.clock.now()
-  const home = (await $.env.get('HOME')) ?? ''
+  const home = (await $.env.get('HOME')) ?? (await $.env.get('USERPROFILE')) ?? ''
   const registry = (await $.env.get('TODO_REGISTRY')) ?? `${home}/.claude/state/todo-projects.tsv`
   const text = await $.fs.read(registry).catch(() => undefined)
   if (typeof text !== 'string') {

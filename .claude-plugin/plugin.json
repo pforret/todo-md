@@ -1,0 +1,12 @@
+{
+  "name": "todo-md",
+  "displayName": "TODO-md",
+  "version": "0.1.0",
+  "description": "Markdown TODO lists in docs/todo: bugs, changes, features and chores as one file each, with a plan → busy → done lifecycle, a /todo skill, a cross-project dashboard pane and a local web dashboard.",
+  "author": { "name": "Peter Forret", "url": "https://github.com/pforret" },
+  "homepage": "https://github.com/pforret/todo-md",
+  "repository": "https://github.com/pforret/todo-md",
+  "license": "MIT",
+  "keywords": ["todo", "markdown", "project-management", "planning", "prp"],
+  "types": "./types/index.d.ts"
+}

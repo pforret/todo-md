@@ -1,14 +1,17 @@
 ---
 name: todo
 description: Unified TODO management for a project's docs/todo — init, list, add, plan (research + questions, the item file becomes the plan), execute (implement from it), done, skip, reopen, and a cross-project registry. Use whenever the user runs /todo (with any arguments), asks to see, add to, or update a project's TODO list, bugs, features, or planned work, asks to plan or implement an item (formerly /generate-prp and /execute-prp), or says "mark as done" / "that's done" after working on a TODO item (the done step includes writing up the Solution).
-user_invocable: true
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/todo.sh *), Bash("${CLAUDE_SKILL_DIR}/scripts/todo.sh" *)
 ---
 
 # TODO
 
-All mechanics live in `~/.claude/scripts/todo.sh`. Run it with Bash and show its
-output; never hand-edit files under `docs/todo/` except an item's prose sections.
-`todo.sh help` is the full command reference.
+All mechanics live in `${CLAUDE_SKILL_DIR}/scripts/todo.sh` — run it with Bash
+(quote the path: `"${CLAUDE_SKILL_DIR}/scripts/todo.sh" index`) and show its
+output. Everywhere this skill's files say `todo.sh`, that is the path to run. The
+supporting files (`reference.md`, `plan.md`, `references/...`) live in
+`${CLAUDE_SKILL_DIR}`. Never hand-edit files under `docs/todo/` except an item's
+prose sections. `todo.sh help` is the full command reference.
 
 **Model:** `docs/todo/` holds open items as `<date>.<type>.<slug>.md` files with
 YAML frontmatter; `plan/`, `busy/`, `done/YYYY-MM/`, `skipped/` hold the rest,

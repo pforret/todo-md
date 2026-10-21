@@ -92,11 +92,12 @@ moves the file and stamps the date; the prose is your job. Do these in order:
    are still placeholders, fill them from context too rather than leaving
    stubs behind.
 4. **Run the framework validation gates** for this project and report the
-   result. Detect the framework and load the matching file:
-   - Laravel: `~/.claude/frameworks/laravel/todo-rules.md`
-   - Python: `~/.claude/frameworks/python/todo-rules.md`
-   - Go: `~/.claude/frameworks/golang/todo-rules.md`
-   - Bash: `~/.claude/frameworks/bash/todo-rules.md`
+   result. Detect the framework and load the matching file (paths relative to
+   this skill's folder):
+   - Laravel: `references/validation/laravel.md`
+   - Python: `references/validation/python.md`
+   - Go: `references/validation/golang.md`
+   - Bash: `references/validation/bash.md`
    If something fails, say so and don't paper over it — the item can stay done
    with the failure noted in `## Solution`, or the user can reopen it; that's
    their call.
@@ -235,7 +236,8 @@ hand). Cross-project views:
 - `/todo busy --all` / "what's in progress everywhere" → `todo.sh global busy`
 - `/todo urgent --all` / "what's essential everywhere" → `todo.sh global urgent`
 - `/todo web` / "open the todo dashboard" → tell the user to run `todo web` in a
-  real terminal (it is a long-running server: `scripts/todo-web.py`, stdlib
+  real terminal (it is a long-running server: `scripts/todo-web.py` inside this
+  skill's folder, next to `todo.sh`; stdlib
   Python, http://127.0.0.1:7474, `--port=N`, `--no-open`, `--json` to dump the
   scan). `/` shows the active items (busy + plan by default, open on request)
   with project / type / urgency / term / category filters, a per-project chart and a

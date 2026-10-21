@@ -24,7 +24,7 @@ export type Scan = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'todo-dashboard': {
+    'todo-md': {
       scan: Scan
       filter: Filter
       project: string

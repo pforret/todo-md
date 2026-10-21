@@ -778,13 +778,17 @@ cmd_web() {
       *) args+=("$arg") ;;
     esac
   done
+  case "$mode" in
+    install|uninstall|restart|proxy|unproxy)
+      [[ "$(uname -s)" == "Darwin" ]] || die "todo web $mode is macOS-only (launchd / Laravel Valet); run the server with: $PROG web"
+      ;;
+  esac
   local python
   python="$(command -v python3 || true)"
   [[ -n "$python" ]] || die "python3 is required for the web dashboard"
 
   case "$mode" in
     install)
-      [[ "$(uname)" == "Darwin" ]] || die "web install uses launchd and only works on macOS"
       local plist log
       plist="$(web_plist)"; log="$(web_log)"
       mkdir -p "$(dirname -- "$plist")" "$(dirname -- "$log")"
@@ -855,7 +859,8 @@ PLIST
     *)
       if web_is_up "$port" && [[ " ${args[*]} " != *" --json "* ]]; then
         printf 'todo web: already running at http://127.0.0.1:%s/\n' "$port"
-        [[ " ${args[*]} " == *" --no-open "* ]] || open "http://127.0.0.1:$port/"
+        # the stdlib knows every platform's browser launcher (open / xdg-open / Windows)
+        [[ " ${args[*]} " == *" --no-open "* ]] || "$python" -I -c 'import sys, webbrowser; webbrowser.open(sys.argv[1])' "http://127.0.0.1:$port/"
         return 0
       fi
       exec "$python" -I "$script_dir/todo-web.py" --port "$port" "${args[@]}"

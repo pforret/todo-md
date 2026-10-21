@@ -93,7 +93,7 @@ describe('pane', () => {
       // the engine's own bottom for ui.render: nothing drawn beneath the plugin
       on('ui.render', () => ({ type: 'Box', props: {}, children: [] }) as never)
       const drawn = await $.ui.mount({
-        plugin: 'todo-dashboard',
+        plugin: 'todo-md',
         surface,
         component: 'Pane',
         requestId: 'todo-dashboard',

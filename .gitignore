@@ -1,0 +1,5 @@
+.DS_Store
+.claude-plugin/types/
+.idea/
+*.tmp
+__pycache__/

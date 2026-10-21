@@ -44,7 +44,7 @@ After `plan`/`execute` the item gets a new label — the script prints it
      requirements), success criteria as a checklist. Keep the user's original
      wording where it was already precise.
    - `## Analysis`: this is the plan proper. Use these subsections, from
-     `~/.claude/templates/todo/prp_base.md`:
+     `references/prp_base.md` (relative to this skill's folder):
      - **Context & references** — documentation URLs with the specific
        sections that matter; the files in this codebase to mirror and why;
        real code snippets as patterns to follow.
@@ -54,7 +54,7 @@ After `plan`/`execute` the item gets a new label — the script prints it
        to touch, error handling, and the **tasks in execution order**.
      - **Validation gates** — commands that run as-is for this project's
        stack (Laravel: `vendor/bin/pint`, `php artisan test`; see the
-       framework todo-rules files for others).
+       `references/validation/*.md` files for others).
      - **Decisions** — the answers the user gave at the gate, so they are not
        re-asked later.
    - Leave `## Solution` empty; that's for execution.

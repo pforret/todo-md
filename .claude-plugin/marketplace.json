@@ -1,0 +1,14 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "todo-md",
+  "description": "Markdown TODO lists in docs/todo with a /todo skill, a dashboard pane and a local web dashboard.",
+  "owner": { "name": "Peter Forret", "url": "https://github.com/pforret" },
+  "plugins": [
+    {
+      "name": "todo-md",
+      "description": "Markdown TODO lists in docs/todo: one file per bug/change/feature/chore, lifecycle open → plan → busy → done, cross-project dashboard.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
