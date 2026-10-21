@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TODO Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ---- DocuForge tokens ---- */
+:root {
+  color-scheme: light;
+  --bg: #FAFAFA; --surface: #FFFFFF; --surface-2: #F4F4F5; --border: #F4F4F5; --border-2: #E4E4E7; --border-3: #D4D4D8;
+  --ink: #18181B; --ink-2: #52525B; --ink-3: #71717A; --ink-4: #A1A1AA;
+  --primary: #2563EB; --primary-hover: #1D4ED8; --primary-tint: #EFF6FF; --secondary: #7C3AED;
+  --busy: #DC2626; --busy-tint: #FEF2F2; --plan: #FB923C; --plan-tint: #FFF7ED; --open: #2563EB; --open-tint: #EFF6FF;
+  --done: #16A34A; --done-tint: #F0FDF4; --skipped: #6B7280; --skipped-tint: #F4F4F5;
+  --essential: #DC2626; --useful: #CA8A04; --nice: #16A34A;
+  --tooltip: #18181B; --tooltip-ink: #FFFFFF;
+  --sh-subtle: 0 1px 2px rgba(0,0,0,.04); --sh-medium: 0 4px 12px rgba(0,0,0,.06); --sh-large: 0 12px 32px rgba(0,0,0,.10);
+  --head: "Plus Jakarta Sans", Inter, system-ui, sans-serif; --body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; --mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121214; --surface: #18181B; --surface-2: #27272A; --border: #27272A; --border-2: #3F3F46; --border-3: #52525B;
+    --ink: #FAFAFA; --ink-2: #D4D4D8; --ink-3: #A1A1AA; --ink-4: #71717A;
+    --primary: #3B82F6; --primary-hover: #60A5FA; --primary-tint: #1E3A8A33; --secondary: #8B5CF6;
+    --busy: #EF4444; --plan: #FDBA74; --open: #3B82F6; --done: #16A34A; --skipped: #71717A;
+    --busy-tint: #EF444426; --plan-tint: #FDBA7426; --open-tint: #3B82F626; --done-tint: #16A34A26; --skipped-tint: #71717A26;
+    --tooltip: #FAFAFA; --tooltip-ink: #18181B;
+    --sh-subtle: 0 1px 2px rgba(0,0,0,.4); --sh-medium: 0 4px 12px rgba(0,0,0,.5); --sh-large: 0 12px 32px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121214; --surface: #18181B; --surface-2: #27272A; --border: #27272A; --border-2: #3F3F46; --border-3: #52525B;
+  --ink: #FAFAFA; --ink-2: #D4D4D8; --ink-3: #A1A1AA; --ink-4: #71717A;
+  --primary: #3B82F6; --primary-hover: #60A5FA; --primary-tint: #1E3A8A33; --secondary: #8B5CF6;
+  --busy: #EF4444; --plan: #FDBA74; --open: #3B82F6; --done: #16A34A; --skipped: #71717A;
+  --busy-tint: #EF444426; --plan-tint: #FDBA7426; --open-tint: #3B82F626; --done-tint: #16A34A26; --skipped-tint: #71717A26;
+  --tooltip: #FAFAFA; --tooltip-ink: #18181B;
+  --sh-subtle: 0 1px 2px rgba(0,0,0,.4); --sh-medium: 0 4px 12px rgba(0,0,0,.5); --sh-large: 0 12px 32px rgba(0,0,0,.6);
+}
+
+/* ---- base ---- */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 400 14px/1.6 var(--body); letter-spacing: .01em; -webkit-font-smoothing: antialiased; }
+a { color: var(--primary); text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; letter-spacing: inherit; }
+button:focus-visible, a:focus-visible, tr:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.overline { font: 600 11px/1.4 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.caption { font: 500 12px/1.4 var(--body); letter-spacing: .02em; color: var(--ink-3); }
+.mono { font-family: var(--mono); }
+kbd { font: 500 11px/1 var(--mono); color: var(--ink-3); background: var(--surface); border: 1px solid var(--border-2); border-radius: 4px; padding: 3px 5px; }
+
+/* ---- layout ---- */
+.app { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+.side { background: var(--surface); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 24px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+.main { padding: 32px 48px 64px; min-width: 0; }
+@media (max-width: 1000px) {
+  .app { grid-template-columns: 1fr; }
+  .side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+  .main { padding: 24px 16px 48px; }
+  .side .projects { display: none; }
+}
+
+/* ---- sidebar ---- */
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px; }
+.brand .logo { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); color: #fff; display: grid; place-items: center; font: 800 14px var(--head); letter-spacing: 0; }
+.brand b { font: 700 16px/1.2 var(--head); letter-spacing: .01em; display: block; }
+.brand small { display: block; font: 500 12px/1.4 var(--body); color: var(--ink-3); }
+.search { position: relative; }
+.search input { width: 100%; padding: 10px 64px 10px 36px; border-radius: 8px; border: 1px solid transparent; background: var(--surface-2); color: var(--ink); font: 400 14px var(--body); }
+.search input::placeholder { color: var(--ink-4); }
+.search input:hover { border-color: var(--border-3); }
+.search input:focus { outline: none; border: 1px solid var(--primary); box-shadow: 0 0 0 1px var(--primary); background: var(--surface); }
+.search .ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-4); pointer-events: none; }
+.search kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); }
+.nav h4 { margin: 0 8px 6px; }
+.nav a, .nav button { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px; border-radius: 8px; color: var(--ink-2); font: 400 14px var(--body); text-align: left; border-left: 2px solid transparent; }
+.nav a:hover, .nav button:hover { background: var(--surface-2); color: var(--ink); }
+.nav a.on, .nav button.on { background: var(--primary-tint); color: var(--primary); border-left-color: var(--primary); font-weight: 500; }
+.nav .n { margin-left: auto; font: 500 12px var(--mono); color: var(--ink-3); }
+.nav a.on .n, .nav button.on .n { color: var(--primary); }
+.nav .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.nav .muted { opacity: .55; }
+.side .foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+.side .foot .row { display: flex; gap: 6px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 8px; font: 500 13px var(--body); transition: background .12s, color .12s, box-shadow .12s; white-space: nowrap; }
+.btn.ghost { color: var(--ink-2); }
+.btn.ghost:hover { background: var(--surface-2); color: var(--ink); }
+.btn.primary { background: var(--primary); color: #fff; }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.secondary { background: var(--surface); color: var(--primary); border: 1px solid var(--primary); }
+.btn.secondary:hover { background: var(--primary-tint); }
+.btn.sm { height: 28px; padding: 0 10px; font-size: 12px; }
+
+/* ---- main ---- */
+.page-head { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
+.page-head h1 { font: 700 30px/1.2 var(--head); letter-spacing: .01em; margin: 4px 0 6px; }
+.page-head p { margin: 0; color: var(--ink-3); font-size: 14px; }
+.page-head .meta { margin-left: auto; text-align: right; }
+.err { background: color-mix(in oklab, var(--essential) 10%, var(--surface)); border: 1px solid var(--essential); border-radius: 8px; padding: 12px 16px; margin-bottom: 24px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--sh-subtle); transition: box-shadow .15s; }
+.card:hover { box-shadow: var(--sh-medium); }
+.card h2 { font: 600 15px/1.3 var(--head); margin: 0 0 16px; display: flex; align-items: center; gap: 12px; }
+.card h2 .legend { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; font: 500 12px var(--body); color: var(--ink-3); }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; vertical-align: -1px; margin-right: 6px; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.tile { padding: 24px; text-align: left; cursor: pointer; position: relative; }
+.tile.on { border-color: var(--c); box-shadow: 0 0 0 1px var(--c), var(--sh-medium); }
+.tile .k { display: flex; align-items: center; gap: 8px; }
+.tile .k i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.tile .v { font: 800 40px/1.15 var(--head); letter-spacing: .02em; margin: 10px 0 4px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.tile .s { color: var(--ink-3); font-size: 12px; }
+.tile .hint { position: absolute; right: 24px; top: 24px; opacity: 0; transition: opacity .12s; }
+.tile:hover .hint { opacity: 1; }
+
+[hidden] { display: none !important; }
+.charts { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; margin-bottom: 24px; }
+.charts.single { grid-template-columns: 1fr; }
+.charts .card { padding: 24px; }
+@media (max-width: 1100px) { .charts { grid-template-columns: 1fr; } }
+.bars { display: grid; grid-template-columns: max-content max-content 1fr max-content; gap: 10px 16px; align-items: center; }
+.bars .name { font-size: 14px; color: var(--ink-2); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; cursor: pointer; }
+.bars .name:hover, .bars .name.on { color: var(--primary); }
+.bars .name.on { font-weight: 500; }
+.bars .track { display: flex; gap: 2px; height: 14px; }
+.bars .seg { height: 100%; border-radius: 3px; min-width: 2px; transition: opacity .12s; cursor: pointer; }
+.bars .seg.dim { opacity: .25; }
+.bars .n { font: 500 12px var(--mono); color: var(--ink-3); }
+.bars .ago { font: 400 12px var(--mono); color: var(--ink-4); white-space: nowrap; }
+.bars .ago.week { color: var(--essential); }
+.bars .ago.month { color: #EA580C; }
+.bars .ago.today { font-weight: 700; }
+.cols { display: flex; align-items: flex-end; gap: 6px; height: 124px; padding-top: 16px; }
+.cols .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; cursor: pointer; }
+.cols .col .bar { width: 100%; max-width: 32px; border-radius: 4px 4px 0 0; background: var(--done); }
+.cols .col .lbl, .cols .col .val { font: 500 11px var(--mono); color: var(--ink-3); white-space: nowrap; }
+.axis { border-top: 1px solid var(--border-2); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.filters .lbl { margin-right: 4px; }
+.chip { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px; border-radius: 4px; background: var(--surface-2); color: var(--ink-2); font: 500 13px var(--body); transition: background .12s, color .12s; }
+.chip:hover { color: var(--ink); background: var(--border-2); }
+.chip.on { background: var(--primary-tint); color: var(--primary); }
+.chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--ink-4)); }
+.chip .cnt { font: 500 12px var(--mono); opacity: .8; }
+.sep { width: 1px; height: 20px; background: var(--border-2); margin: 0 6px; }
+select { height: 32px; padding: 0 30px 0 12px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--surface); color: var(--ink-2); font: 500 13px var(--body); appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink-4) 50%), linear-gradient(135deg, var(--ink-4) 50%, transparent 50%); background-position: calc(100% - 15px) 13px, calc(100% - 10px) 13px; background-size: 5px 5px; background-repeat: no-repeat; }
+select:hover { border-color: var(--border-3); }
+select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+
+.table { padding: 0; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead th { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+thead th.on { color: var(--primary); }
+tbody td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; min-height: 48px; }
+tbody tr { cursor: pointer; transition: background .1s; }
+tbody tr:hover td { background: var(--surface-2); }
+tbody tr:last-child td { border-bottom: 0; }
+td.title { font-weight: 500; color: var(--ink); max-width: 640px; }
+td.title small { display: block; font-weight: 400; color: var(--ink-3); margin-top: 2px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; font: 500 12px var(--mono); background: var(--tint); color: var(--c); white-space: nowrap; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); vertical-align: -1px; margin-right: 6px; }
+.proj { color: var(--ink-2); white-space: nowrap; font-weight: 500; }
+.type { white-space: nowrap; color: var(--ink-2); }
+.date { font: 400 12.5px var(--mono); color: var(--ink-3); white-space: nowrap; }
+.empty { padding: 48px; text-align: center; color: var(--ink-3); }
+tfoot td { padding: 12px 16px; color: var(--ink-3); font-size: 12.5px; }
+
+.tip { position: fixed; pointer-events: none; background: var(--tooltip); color: var(--tooltip-ink); padding: 4px 10px; border-radius: 6px; font: 400 12px var(--body); z-index: 50; opacity: 0; transition: opacity .08s; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.15); max-width: 280px; }
+.tip.show { opacity: 1; }
+.tip b { font-weight: 600; }
+
+/* ---- drawer ---- */
+.drawer { position: fixed; inset: 0; z-index: 40; display: none; }
+.drawer.open { display: block; }
+.drawer .bg { position: absolute; inset: 0; background: rgba(0,0,0,.35); }
+.drawer .panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(820px, 100%); background: var(--surface); box-shadow: var(--sh-large); display: flex; flex-direction: column; animation: slide .18s ease-out; }
+@keyframes slide { from { transform: translateX(24px); opacity: 0; } }
+.drawer .head { padding: 24px 32px 20px; border-bottom: 1px solid var(--border); }
+.drawer .head h3 { margin: 10px 0 10px; font: 600 22px/1.3 var(--head); }
+.drawer .head .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; color: var(--ink-2); font-size: 13px; }
+.drawer .path { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.drawer .path code { font: 400 12px var(--mono); color: var(--ink-3); word-break: break-all; background: var(--surface-2); padding: 4px 8px; border-radius: 4px; }
+.drawer .body { padding: 8px 32px 48px; overflow: auto; flex: 1; }
+.drawer .x { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 8px; color: var(--ink-3); display: grid; place-items: center; }
+.drawer .x:hover { color: var(--ink); background: var(--surface-2); }
+.md { max-width: 768px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.md h1 { font: 700 20px/1.3 var(--head); color: var(--ink); margin: 24px 0 8px; }
+.md h2 { font: 600 11px/1.4 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 32px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.md h3 { font: 600 16px/1.3 var(--head); color: var(--ink); margin: 20px 0 6px; }
+.md h4 { font: 600 14px/1.4 var(--body); color: var(--ink); margin: 16px 0 4px; }
+.md p, .md ul, .md ol { margin: 8px 0 12px; }
+.md li { margin: 3px 0; }
+.md strong { color: var(--ink); font-weight: 600; }
+.md code { font: 400 13px var(--mono); background: var(--surface-2); padding: 1px 6px; border-radius: 4px; color: var(--secondary); }
+.md pre { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border-2); padding: 14px 16px; border-radius: 12px; overflow: auto; font: 400 13px/1.7 var(--mono); }
+.md pre code { background: none; padding: 0; color: var(--ink); font-size: inherit; }
+.md blockquote { border-left: 2px solid var(--primary); background: var(--primary-tint); margin: 10px 0; padding: 8px 16px; border-radius: 0 8px 8px 0; }
+.md table { font-size: 13px; margin: 10px 0; border: 1px solid var(--border-2); border-radius: 8px; }
+.md th, .md td { border-bottom: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+.md th { background: var(--surface-2); font-weight: 600; color: var(--ink); }
+.md hr { border: 0; border-top: 1px solid var(--border-2); margin: 24px 0; }
+.md input[type=checkbox] { width: 16px; height: 16px; margin-right: 8px; vertical-align: -3px; accent-color: var(--primary); }
+.md a { text-decoration: underline; text-decoration-color: color-mix(in oklab, var(--primary) 40%, transparent); }
+.hide-sm { }
+@media (max-width: 760px) { .hide-sm { display: none; } .page-head h1 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">✓</div>
+      <div><b>TODO</b><small>across every project</small></div>
+    </div>
+    <div class="search">
+      <span class="ico">⌕</span>
+      <input type="search" id="q" placeholder="Search items…" autocomplete="off">
+      <kbd>/</kbd>
+    </div>
+    <nav class="nav">
+      <h4 class="overline">Views</h4>
+      <a href="/" id="navActive">⚡ Active work <span class="n" id="nActive"></span></a>
+      <a href="/history/" id="navHistory">🕘 History <span class="n" id="nHistory"></span></a>
+    </nav>
+    <nav class="nav projects">
+      <h4 class="overline">Projects</h4>
+      <div id="projectNav"></div>
+    </nav>
+    <div class="foot">
+      <div class="caption" id="meta">loading…</div>
+      <div class="row">
+        <button class="btn ghost sm" id="refresh" title="Rescan every project (r)">↻ Refresh</button>
+        <button class="btn ghost sm" id="theme" title="Toggle light / dark">◐ Theme</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <div class="overline" id="pageOverline">Cross-project</div>
+        <h1 id="pageTitle">Active work</h1>
+        <p id="pageSub"></p>
+      </div>
+      <div class="meta caption" id="pageMeta"></div>
+    </div>
+
+    <div id="error" class="err" hidden></div>
+    <div class="tiles" id="tiles"></div>
+
+    <div class="charts" id="charts">
+      <div class="card" id="barsCard">
+        <h2>Items per project <span class="legend" id="legend"></span></h2>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="card" id="monthsCard">
+        <h2>Finished per month <span class="legend" id="monthsTotal"></span></h2>
+        <div class="cols" id="months"></div>
+        <div class="axis"></div>
+      </div>
+    </div>
+
+    <div class="filters" id="statusChips"></div>
+    <div class="filters">
+      <select id="project"><option value="">Every project</option></select>
+      <select id="type"><option value="">Any type</option></select>
+      <select id="urgency"><option value="">Any urgency</option></select>
+      <select id="term"><option value="">Any term</option></select>
+      <select id="category"><option value="">Any category</option></select>
+      <span class="sep"></span>
+      <button class="btn ghost sm" id="clear" title="Reset every filter">Clear filters</button>
+    </div>
+
+    <div class="card table">
+      <table>
+        <thead><tr>
+          <th class="overline" data-k="status">Status</th>
+          <th class="overline" data-k="project">Project</th>
+          <th class="overline hide-sm" data-k="type">Type</th>
+          <th class="overline hide-sm" data-k="urgency" title="urgency · complexity · term">Urg.</th>
+          <th class="overline" data-k="title">Title</th>
+          <th class="overline hide-sm" data-k="category">Category</th>
+          <th class="overline" data-k="date">Date</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+        <tfoot><tr><td colspan="7" id="foot"></td></tr></tfoot>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<div class="drawer" id="drawer" aria-modal="true" role="dialog">
+  <div class="bg" id="drawerBg"></div>
+  <div class="panel">
+    <button class="x" id="drawerX" title="Close (Esc)">✕</button>
+    <div class="head" id="drawerHead"></div>
+    <div class="body md" id="drawerBody"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+const STATUSES = ['busy', 'plan', 'open', 'done', 'skipped'];
+const HISTORY = /^\/history\/?$/.test(location.pathname);
+const PAGE_STATUSES = HISTORY ? ['done', 'skipped'] : ['busy', 'plan', 'open'];
+const DEFAULT_STATUS = HISTORY ? ['done', 'skipped'] : ['busy', 'plan'];
+document.title = HISTORY ? 'TODO History' : 'TODO Dashboard';
+const STATUS_LABEL = { busy: 'BUSY', plan: 'PLAN', open: 'OPEN', done: 'DONE', skipped: 'SKIP' };
+const STATUS_NAME = { busy: 'Busy', plan: 'Planning', open: 'Open', done: 'Done', skipped: 'Skipped' };
+const STATUS_HINT = { busy: 'in progress right now', plan: 'being researched and planned', open: 'not started yet', done: 'completed', skipped: 'duplicate, wontfix, superseded…' };
+const TYPE_ICON = { bug: '🐛', feature: '✨', change: '🔧', chore: '🧹' };
+const URGENCY_VAR = { essential: 'var(--essential)', useful: 'var(--useful)', 'nice-to-have': 'var(--nice)' };
+const COMPLEXITY_ICON = { low: '👟', medium: '🥾', high: '👢' };
+const TERM_ICON = { short: '⚡', long: '🔭' }, TERM_LABEL = { short: 'short term', long: 'long term' };
+const REFRESH_MS = 60000;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const el = (tag, attrs = {}, html = '') => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) k === 'style' ? n.style.cssText = v : n.setAttribute(k, v); n.innerHTML = html; return n; };
+const badge = s => `<span class="badge" style="--c:var(--${s});--tint:var(--${s}-tint)">${STATUS_LABEL[s]}</span>`;
+
+let data = { items: [], projects: [], counts: {} };
+let state = readHash();
+let sort = { k: null, dir: 1 };
+
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  return {
+    status: new Set((p.get('status') ?? DEFAULT_STATUS.join(',')).split(',').filter(x => PAGE_STATUSES.includes(x))),
+    project: p.get('project') ?? '', type: p.get('type') ?? '', urgency: p.get('urgency') ?? '',
+    term: p.get('term') ?? '', category: p.get('category') ?? '', q: p.get('q') ?? '',
+  };
+}
+function writeHash() {
+  const p = new URLSearchParams();
+  p.set('status', [...state.status].join(','));
+  for (const k of ['project', 'type', 'urgency', 'term', 'category', 'q']) if (state[k]) p.set(k, state[k]);
+  history.replaceState(null, '', '#' + p.toString());
+}
+const otherHash = () => { const p = new URLSearchParams(); if (state.project) p.set('project', state.project); return p.toString() ? '#' + p : ''; };
+
+// ---------- theme ----------
+try { const t = localStorage.getItem('todo-theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+$('theme').onclick = () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('todo-theme', next); } catch {}
+};
+
+// ---------- data ----------
+async function load() {
+  $('refresh').textContent = '↻ Scanning…';
+  try {
+    const r = await fetch('/api/todos', { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    data = await r.json();
+    $('error').hidden = true;
+    if (!data.projects.length) { $('error').hidden = false; $('error').textContent = `No projects registered in ${data.registry}. Run /todo init in a project first.`; }
+  } catch (e) {
+    $('error').hidden = false;
+    $('error').textContent = 'Could not reach the todo-web server: ' + e.message + ' — is the service running? (todo web status)';
+  }
+  $('refresh').textContent = '↻ Refresh';
+  render();
+}
+const pageItems = () => data.items.filter(i => PAGE_STATUSES.includes(i.status));
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  return pageItems().filter(i =>
+    state.status.has(i.status) &&
+    (!state.project || i.project === state.project) &&
+    (!state.type || i.type === state.type) &&
+    (!state.urgency || i.urgency === state.urgency) &&
+    (!state.term || i.term === state.term) &&
+    (!state.category || i.category === state.category) &&
+    (!q || (i.title + ' ' + i.description + ' ' + i.category + ' ' + i.project + ' ' + i.milestone + ' ' + i.date + ' ' + i.finished).toLowerCase().includes(q)));
+}
+
+// ---------- render ----------
+function render() {
+  writeHash();
+  const items = filtered();
+  const t = data.scannedAt ? new Date(data.scannedAt) : null;
+  const active = data.items.filter(i => !HISTORY ? PAGE_STATUSES.includes(i.status) : ['busy', 'plan', 'open'].includes(i.status)).length;
+  const finished = data.items.filter(i => ['done', 'skipped'].includes(i.status)).length;
+  $('nActive').textContent = active; $('nHistory').textContent = finished;
+  $('navActive').classList.toggle('on', !HISTORY); $('navHistory').classList.toggle('on', HISTORY);
+  $('navActive').href = '/' + otherHash(); $('navHistory').href = '/history/' + otherHash();
+  $('pageTitle').textContent = HISTORY ? 'History' : 'Active work';
+  $('pageOverline').textContent = state.project ? state.project : 'All projects';
+  $('pageSub').textContent = HISTORY ? 'Everything that was finished or set aside, across every registered project.' : 'What is busy, being planned, or waiting to be picked up.';
+  $('pageMeta').innerHTML = `${data.projects.length} projects · ${data.items.length} items<br>scanned ${t ? t.toLocaleTimeString() : '—'} · refreshes every ${REFRESH_MS / 1000}s`;
+  $('meta').textContent = t ? `Registry: ${data.projects.length} projects · scanned ${t.toLocaleTimeString()}` : 'Scanning…';
+  $('barsCard').hidden = !!state.project;
+  $('monthsCard').hidden = !HISTORY;
+  $('charts').hidden = !!state.project && !HISTORY;
+  $('charts').classList.toggle('single', !HISTORY || !!state.project);
+  renderTiles(); if (!state.project) renderBars(); if (HISTORY) renderMonths(); renderChips(); renderSelects(); renderProjectNav(); renderTable(items);
+}
+
+function renderTiles() {
+  const box = $('tiles'); box.innerHTML = '';
+  for (const s of PAGE_STATUSES) {
+    const n = pageItems().filter(i => i.status === s && (!state.project || i.project === state.project)).length;
+    const only = state.status.size === 1 && state.status.has(s);
+    const b = el('button', { class: 'card tile' + (state.status.has(s) ? ' on' : ''), style: `--c: var(--${s})`, title: `${only ? 'Show every status' : 'Show only ' + STATUS_NAME[s]} · shift-click toggles` },
+      `<div class="k overline"><i></i>${STATUS_NAME[s]}</div><div class="v">${n}</div><div class="s">${STATUS_HINT[s]}</div><span class="hint caption">${only ? 'show all' : 'only'}</span>`);
+    b.onclick = e => {
+      if (e.shiftKey) { state.status.has(s) ? state.status.delete(s) : state.status.add(s); }
+      else if (only) { state.status = new Set(PAGE_STATUSES); }
+      else { state.status = new Set([s]); }
+      render();
+    };
+    box.append(b);
+  }
+}
+
+const RTF = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+function daysAgo(iso) {
+  const t = new Date(String(iso).slice(0, 10) + 'T00:00'); if (isNaN(t)) return NaN;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.round((t - today) / 864e5);
+}
+function ago(iso) {
+  const days = daysAgo(iso); if (isNaN(days)) return '';
+  if (days >= 0) return RTF.format(0, 'day');
+  for (const [u, n] of [['year', 365], ['month', 30], ['week', 7]]) if (-days >= n) return RTF.format(Math.round(days / n), u);
+  return RTF.format(days, 'day');
+}
+function lastActivity(project) {
+  let last = '';
+  for (const i of data.items) if (i.project === project) for (const d of [i.created, i.started, i.finished, i.date]) if (d && d > last) last = d;
+  return last;
+}
+
+function renderBars() {
+  const box = $('bars'); box.innerHTML = '';
+  const shown = PAGE_STATUSES;
+  $('legend').innerHTML = shown.map(s => `<span><i style="background:var(--${s})"></i>${STATUS_NAME[s]}</span>`).join('');
+  const projects = data.projects.map(p => ({ ...p, total: shown.reduce((a, s) => a + (p.counts?.[s] ?? 0), 0) })).sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+  const max = Math.max(1, ...projects.map(p => p.total));
+  for (const p of projects) {
+    const name = el('div', { class: 'name' + (state.project === p.name ? ' on' : ''), title: p.path }, esc(p.name));
+    name.onclick = () => { state.project = state.project === p.name ? '' : p.name; render(); };
+    const track = el('div', { class: 'track' });
+    for (const s of shown) {
+      const n = p.counts?.[s] ?? 0; if (!n) continue;
+      const seg = el('div', { class: 'seg' + (state.status.has(s) ? '' : ' dim'), style: `background:var(--${s});flex:${n} 0 0` });
+      seg.onmousemove = e => tip(e, `<b>${esc(p.name)}</b> · ${STATUS_NAME[s]}: <b>${n}</b> of ${p.total}`);
+      seg.onmouseleave = hideTip;
+      seg.onclick = () => { state.project = p.name; state.status = new Set([s]); render(); };
+      track.append(seg);
+    }
+    track.style.width = (p.total / max) * 100 + '%';
+    const last = lastActivity(p.name), age = last ? -daysAgo(last) : NaN;
+    const ageClass = (age < 7 ? ' week' : age < 30 ? ' month' : '') + (age <= 0 ? ' today' : '');
+    box.append(name, el('div', { class: 'ago' + ageClass, title: last ? 'last activity ' + last : 'no activity' }, last ? esc(ago(last)) : '—'),
+      track, el('div', { class: 'n' }, p.hasTodo ? String(p.total) : '<span title="no docs/todo folder">—</span>'));
+  }
+}
+
+function renderMonths() {
+  const box = $('months'); box.innerHTML = '';
+  const months = [];
+  const d = new Date(); d.setDate(1);
+  for (let i = 11; i >= 0; i--) { const m = new Date(d.getFullYear(), d.getMonth() - i, 1); months.push(m.toISOString().slice(0, 7)); }
+  const counts = Object.fromEntries(months.map(m => [m, 0]));
+  const done = data.items.filter(i => i.status === 'done' && (!state.project || i.project === state.project));
+  for (const i of done) { const m = (i.finished || i.date || '').slice(0, 7); if (m in counts) counts[m]++; }
+  const max = Math.max(1, ...Object.values(counts));
+  const total = months.reduce((a, m) => a + counts[m], 0);
+  $('monthsTotal').textContent = `${total} done in 12 months`;
+  months.forEach((m, idx) => {
+    const n = counts[m];
+    const col = el('div', { class: 'col' });
+    const bar = el('div', { class: 'bar', style: `height:${Math.max(n ? 3 : 1, (n / max) * 80)}px;${n ? '' : 'background:var(--border-2)'}` });
+    const label = new Date(m + '-02').toLocaleString(undefined, { month: 'short' });
+    col.append(el('div', { class: 'val' }, n && (n === max || idx === 11) ? String(n) : '&nbsp;'), bar, el('div', { class: 'lbl' }, idx % 2 === 0 || idx === 11 ? label : '&nbsp;'));
+    col.onmousemove = e => tip(e, `<b>${m}</b>: ${n} done`);
+    col.onmouseleave = hideTip;
+    col.onclick = () => { state.status = new Set(['done']); state.q = m; $('q').value = m; render(); };
+    box.append(col);
+  });
+}
+
+function renderChips() {
+  const box = $('statusChips'); box.innerHTML = '';
+  box.append(el('span', { class: 'overline lbl' }, 'Status'));
+  for (const s of PAGE_STATUSES) {
+    const n = data.counts[s] ?? 0;
+    const c = el('button', { class: 'chip' + (state.status.has(s) ? ' on' : ''), style: `--c: var(--${s})` }, `<i></i>${STATUS_NAME[s]} <span class="cnt">${n}</span>`);
+    c.onclick = () => { state.status.has(s) ? state.status.delete(s) : state.status.add(s); render(); };
+    box.append(c);
+  }
+  box.append(el('span', { class: 'sep' }));
+  if (!HISTORY) {
+    const inProgress = el('button', { class: 'chip' }, 'Busy + plan');
+    inProgress.onclick = () => { state.status = new Set(DEFAULT_STATUS); render(); };
+    box.append(inProgress);
+  }
+  const all = el('button', { class: 'chip' }, HISTORY ? 'Done + skipped' : 'Busy + plan + open');
+  all.onclick = () => { state.status = new Set(PAGE_STATUSES); render(); };
+  box.append(all);
+}
+
+function renderProjectNav() {
+  const box = $('projectNav'); box.innerHTML = '';
+  const every = el('button', { class: state.project ? '' : 'on' }, `<span class="dot" style="--c:var(--primary)"></span>Every project <span class="n">${pageItems().length}</span>`);
+  every.onclick = () => { state.project = ''; render(); };
+  box.append(every);
+  for (const p of data.projects) {
+    const n = PAGE_STATUSES.reduce((a, s) => a + (p.counts?.[s] ?? 0), 0);
+    const b = el('button', { class: (state.project === p.name ? 'on' : '') + (n ? '' : ' muted'), title: p.path }, `<span class="dot" style="--c:var(--ink-4)"></span>${esc(p.name)} <span class="n">${p.hasTodo ? n : '—'}</span>`);
+    b.onclick = () => { state.project = state.project === p.name ? '' : p.name; render(); };
+    box.append(b);
+  }
+}
+
+function fillSelect(id, values, current, label) {
+  const sel = $(id); const keep = sel.firstElementChild.outerHTML;
+  sel.innerHTML = keep + values.map(v => `<option value="${esc(v)}"${v === current ? ' selected' : ''}>${esc(label ? label(v) : v)}</option>`).join('');
+  sel.value = current;
+}
+function renderSelects() {
+  const uniq = k => [...new Set(pageItems().map(i => i[k]).filter(Boolean))].sort();
+  fillSelect('project', data.projects.map(p => p.name), state.project);
+  fillSelect('type', uniq('type'), state.type, v => `${TYPE_ICON[v] ?? '▫️'} ${v}`);
+  fillSelect('urgency', ['essential', 'useful', 'nice-to-have'].filter(u => uniq('urgency').includes(u)), state.urgency);
+  fillSelect('term', ['short', 'long'], state.term, v => `${TERM_ICON[v]} ${TERM_LABEL[v]}`);
+  fillSelect('category', uniq('category'), state.category);
+  $('q').value = state.q;
+}
+for (const k of ['project', 'type', 'urgency', 'term', 'category']) $(k).onchange = e => { state[k] = e.target.value; render(); };
+$('q').oninput = e => { state.q = e.target.value; renderTable(filtered()); writeHash(); };
+$('clear').onclick = () => { state = { ...readHash(), status: new Set(DEFAULT_STATUS), project: '', type: '', urgency: '', term: '', category: '', q: '' }; render(); };
+$('refresh').onclick = load;
+
+function renderTable(items) {
+  if (sort.k) {
+    const rank = { busy: 0, plan: 1, open: 2, done: 3, skipped: 4 }, urank = { essential: 0, useful: 1, 'nice-to-have': 2 };
+    const key = i => sort.k === 'status' ? rank[i.status] : sort.k === 'urgency' ? (i.term === 'long' ? 10 : 0) + (urank[i.urgency] ?? 9) : (i[sort.k] ?? '');
+    items = [...items].sort((a, b) => { const x = key(a), y = key(b); return (x < y ? -1 : x > y ? 1 : 0) * sort.dir; });
+  }
+  document.querySelectorAll('thead th').forEach(th => { th.classList.toggle('on', th.dataset.k === sort.k); th.textContent = th.textContent.replace(/ [↑↓]$/, '') + (th.dataset.k === sort.k ? (sort.dir > 0 ? ' ↑' : ' ↓') : ''); });
+  const body = $('rows'); body.innerHTML = '';
+  if (!items.length) { body.append(el('tr', {}, `<td colspan="7" class="empty">Nothing matches these filters.</td>`)); }
+  for (const i of items) {
+    const tr = el('tr', { tabindex: '0' }, `
+      <td>${badge(i.status)}</td>
+      <td class="proj" title="${esc(i.projectPath)}">${esc(i.project)}</td>
+      <td class="type hide-sm">${TYPE_ICON[i.type] ?? '▫️'} ${esc(i.type)}</td>
+      <td class="hide-sm" title="${esc(i.urgency)} · complexity ${esc(i.complexity)} · ${TERM_LABEL[i.term] ?? ''}"><span class="dot" style="--c:${URGENCY_VAR[i.urgency] ?? 'var(--ink-4)'}"></span>${COMPLEXITY_ICON[i.complexity] ?? ''}${TERM_ICON[i.term] ?? ''}</td>
+      <td class="title">${esc(i.title)}${i.description ? `<small>${esc(i.description.slice(0, 160))}${i.description.length > 160 ? '…' : ''}</small>` : ''}${i.skipReason ? `<small>skipped: ${esc(i.skipReason)}</small>` : ''}</td>
+      <td class="hide-sm" style="color:var(--ink-2)">${esc(i.category)}${i.milestone ? `<br><span class="caption">🏁 ${esc(i.milestone)}</span>` : ''}</td>
+      <td class="date" title="created ${esc(i.created)}${i.started ? ' · started ' + esc(i.started) : ''}${i.finished ? ' · finished ' + esc(i.finished) : ''}">${esc(i.date)}</td>`);
+    tr.onclick = () => openItem(i);
+    tr.onkeydown = e => { if (e.key === 'Enter') openItem(i); };
+    body.append(tr);
+  }
+  $('foot').textContent = `${items.length} of ${pageItems().length} ${HISTORY ? 'finished' : 'active'} items shown · click a row for details`;
+}
+document.querySelectorAll('thead th').forEach(th => th.onclick = () => { const k = th.dataset.k; sort = sort.k === k ? { k, dir: -sort.dir } : { k, dir: 1 }; renderTable(filtered()); });
+
+// ---------- tooltip ----------
+function tip(e, html) { const t = $('tip'); t.innerHTML = html; t.classList.add('show'); const x = Math.min(e.clientX + 12, innerWidth - t.offsetWidth - 8); t.style.left = x + 'px'; t.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { $('tip').classList.remove('show'); }
+
+// ---------- detail drawer ----------
+async function openItem(i) {
+  const d = $('drawer'); d.classList.add('open');
+  $('drawerHead').innerHTML = `<div class="row">${badge(i.status)}<span class="proj">${esc(i.project)}</span><span class="caption mono">${esc(i.relative)}</span></div>
+    <h3>${esc(i.title)}</h3>
+    <div class="row">${TYPE_ICON[i.type] ?? '▫️'} ${esc(i.type)} · <span class="dot" style="--c:${URGENCY_VAR[i.urgency] ?? 'var(--ink-4)'}"></span>${esc(i.urgency)} · ${COMPLEXITY_ICON[i.complexity] ?? ''} ${esc(i.complexity)} · ${TERM_ICON[i.term] ?? ''} ${TERM_LABEL[i.term] ?? ''} · ${esc(i.category)}${i.milestone ? ' · 🏁 ' + esc(i.milestone) : ''} · <span class="mono">created ${esc(i.created)}${i.started ? ' · started ' + esc(i.started) : ''}${i.finished ? ' · finished ' + esc(i.finished) : ''}</span></div>
+    <div class="path"><code>${esc(i.file)}</code><button class="btn secondary sm" id="copyPath">Copy path</button><a class="btn ghost sm" href="vscode://file${esc(i.file)}">Open in VS Code</a></div>`;
+  $('copyPath').onclick = async () => { try { await navigator.clipboard.writeText(i.file); $('copyPath').textContent = 'Copied'; } catch { $('copyPath').textContent = 'Select & copy'; } };
+  $('drawerBody').innerHTML = '<p class="caption">Loading…</p>';
+  try {
+    const r = await fetch('/api/item?file=' + encodeURIComponent(i.file));
+    const full = await r.json();
+    $('drawerBody').innerHTML = markdown(full.body || '_empty_');
+  } catch (e) { $('drawerBody').innerHTML = `<p class="err">Could not load the item: ${esc(e.message)}</p>`; }
+}
+function closeDrawer() { $('drawer').classList.remove('open'); }
+$('drawerBg').onclick = closeDrawer; $('drawerX').onclick = closeDrawer;
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDrawer(); if (document.activeElement === $('q')) $('q').blur(); }
+  if (e.target.matches('input, select, textarea')) return;
+  if (e.key === '/') { e.preventDefault(); $('q').focus(); }
+  if (e.key === 'r') load();
+  const map = { b: 'busy', p: 'plan', o: 'open', d: 'done', s: 'skipped' };
+  if (map[e.key] && PAGE_STATUSES.includes(map[e.key])) { state.status = new Set([map[e.key]]); render(); }
+  if (e.key === 'a') { state.status = new Set(PAGE_STATUSES); render(); }
+  if (e.key === 'h') location.href = (HISTORY ? '/' : '/history/') + otherHash();
+});
+
+// ---------- tiny markdown renderer ----------
+function inline(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[\s(])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+    .replace(/(^|[\s(])_([^_\n]+)_/g, '$1<em>$2</em>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<em>[image: $1]</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, t, u) => /^https?:/.test(u) ? `<a href="${u}" target="_blank" rel="noopener">${t}</a>` : `<a title="${u}">${t}</a>`);
+}
+function markdown(src) {
+  const lines = src.replace(/^# .*\n/, '').split('\n');
+  let out = '', i = 0;
+  const para = [];
+  const flush = () => { if (para.length) { out += `<p>${inline(para.join(' '))}</p>`; para.length = 0; } };
+  while (i < lines.length) {
+    const l = lines[i];
+    if (/^```/.test(l)) { flush(); let j = i + 1, code = []; while (j < lines.length && !/^```/.test(lines[j])) code.push(lines[j++]); out += `<pre><code>${esc(code.join('\n'))}</code></pre>`; i = j + 1; continue; }
+    const h = /^(#{1,6})\s+(.*)/.exec(l);
+    if (h) { flush(); out += `<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`; i++; continue; }
+    if (/^\s*([-*+]|\d+\.)\s+/.test(l)) {
+      flush(); const ordered = /^\s*\d+\./.test(l); let items = [];
+      while (i < lines.length && /^\s*([-*+]|\d+\.)\s+/.test(lines[i])) {
+        let t = lines[i].replace(/^\s*([-*+]|\d+\.)\s+/, '');
+        const box = /^\[( |x|X)\]\s*/.exec(t);
+        if (box) t = t.slice(box[0].length);
+        items.push(`<li>${box ? `<input type="checkbox" disabled${box[1].trim() ? ' checked' : ''}>` : ''}${inline(t)}</li>`); i++;
+      }
+      out += `<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`; continue;
+    }
+    if (/^\s*\|/.test(l) && /^\s*\|?\s*:?-+/.test(lines[i + 1] ?? '')) {
+      flush(); const cells = r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => inline(c.trim()));
+      out += `<table><thead><tr>${cells(l).map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`; i += 2;
+      while (i < lines.length && /^\s*\|/.test(lines[i])) { out += `<tr>${cells(lines[i]).map(c => `<td>${c}</td>`).join('')}</tr>`; i++; }
+      out += '</tbody></table>'; continue;
+    }
+    if (/^>\s?/.test(l)) { flush(); let q = []; while (i < lines.length && /^>\s?/.test(lines[i])) q.push(lines[i++].replace(/^>\s?/, '')); out += `<blockquote>${inline(q.join(' '))}</blockquote>`; continue; }
+    if (/^(-{3,}|\*{3,})\s*$/.test(l)) { flush(); out += '<hr>'; i++; continue; }
+    if (!l.trim()) { flush(); i++; continue; }
+    para.push(l); i++;
+  }
+  flush();
+  return out;
+}
+
+// ---------- go ----------
+load();
+setInterval(load, REFRESH_MS);
+addEventListener('hashchange', () => { state = readHash(); render(); });
+})();
+</script>
+</body>
+</html>
